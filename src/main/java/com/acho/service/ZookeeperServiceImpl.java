@@ -3,6 +3,7 @@ package com.acho.service;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.data.Stat;
 
 public class ZookeeperServiceImpl implements ZookeeperService {
 
@@ -25,7 +26,17 @@ public class ZookeeperServiceImpl implements ZookeeperService {
     }
 
     @Override
-    public void create(String path, String data) throws Exception {
-        zooKeeper.create(path, data.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT_SEQUENTIAL);
+    public void create(String path, String data, CreateMode mode) throws Exception {
+        zooKeeper.create(path, data.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, mode);
+    }
+
+    @Override
+    public Stat exists(String path) throws Exception {
+        return zooKeeper.exists(path, true);
+    }
+
+    @Override
+    public ZooKeeper getZookeeper() {
+        return zooKeeper;
     }
 }
