@@ -10,9 +10,11 @@ public interface ZookeeperService {
 
     void disconnect() throws Exception;
 
-    void create(String path, String data, CreateMode mode) throws Exception;
+    String create(String path, String data, CreateMode mode) throws Exception;
 
     Stat exists(String path) throws Exception;
+
+    void delete(String path) throws Exception;
 
     ZooKeeper getZookeeper();
 }

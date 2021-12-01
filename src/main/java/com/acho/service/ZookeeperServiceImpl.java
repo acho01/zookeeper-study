@@ -26,13 +26,18 @@ public class ZookeeperServiceImpl implements ZookeeperService {
     }
 
     @Override
-    public void create(String path, String data, CreateMode mode) throws Exception {
-        zooKeeper.create(path, data.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, mode);
+    public String create(String path, String data, CreateMode mode) throws Exception {
+        return zooKeeper.create(path, data.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, mode);
     }
 
     @Override
     public Stat exists(String path) throws Exception {
         return zooKeeper.exists(path, true);
+    }
+
+    @Override
+    public void delete(String path) throws Exception {
+        zooKeeper.delete(path, exists(path).getVersion());
     }
 
     @Override
