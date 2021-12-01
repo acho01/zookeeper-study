@@ -18,19 +18,18 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         zookeeperService = new ZookeeperServiceImpl();
-        zookeeperService.connect("localhost");
         String counterPath = "/counter";
         String rootLock = "/ROOT_LOCK";
-        simpleLock = new SimpleDistributedLock(rootLock, zookeeperService);
 
-        simpleLock.lock();
-        Stat stat = zookeeperService.exists(counterPath);
-        if (stat == null) {
-            zookeeperService.create(counterPath, "0", CreateMode.PERSISTENT);
-        }
-        simpleLock.unlock();
+        for (int i = 0; i < 1000; i++) {
+            simpleLock = new SimpleDistributedLock(rootLock, zookeeperService);
 
-        for (int i = 0; i < 10000; i++) {
+            simpleLock.lock();
+            Stat stat = zookeeperService.exists(counterPath);
+            if (stat == null) {
+                zookeeperService.create(counterPath, "0", CreateMode.PERSISTENT);
+            }
+            simpleLock.unlock();
             simpleLock.lock();
             increment(counterPath);
             simpleLock.unlock();

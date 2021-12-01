@@ -17,7 +17,7 @@ public class SimpleDistributedLock {
 
     private ZookeeperService zookeeperService;
 
-    private CountDownLatch lockCountDownLatch = new CountDownLatch(1);
+    private CountDownLatch lockCountDownLatch;
 
     private String rootPath;
 
@@ -29,14 +29,14 @@ public class SimpleDistributedLock {
     }
 
     public void lock() throws Exception {
+        zookeeperService.connect("localhost");
+        lockCountDownLatch = new CountDownLatch(1);
         String zNodeN = rootPath + LOCK_PATH;
         lockZNode = zookeeperService.create(zNodeN, "lock", CreateMode.EPHEMERAL_SEQUENTIAL);
-
-        while (true) {
+        for (int i = 0; i < 2; i++) {
             List<String> children = zookeeperService.getZookeeper().getChildren(rootPath, false);
-
             if (children.size() == 0) {
-                return;
+                break;
             }
 
             children.sort((nodeA, nodeB) -> {
@@ -45,7 +45,7 @@ public class SimpleDistributedLock {
                 return Integer.compare(nodeAIndex, nodeBIndex);
             });
             if (extractZNodeSeq(lockZNode).equals(extractZNodeSeq(children.get(0)))) {
-                return;
+                break;
             }
 
             String zNodeP = getPreviousZNode(lockZNode, children);
@@ -67,7 +67,7 @@ public class SimpleDistributedLock {
     private String getPreviousZNode(String createdZNodeN, List<String> children) {
         int resIndex = 0;
         for (int i = 0; i < children.size() - 1; i++) {
-            if (children.get(i + 1).equals(createdZNodeN)) {
+            if (createdZNodeN.contains(children.get(i + 1))) {
                 resIndex = i;
                 break;
             }
@@ -77,5 +77,6 @@ public class SimpleDistributedLock {
 
     public void unlock() throws Exception {
         zookeeperService.delete(lockZNode);
+        zookeeperService.disconnect();
     }
 }
